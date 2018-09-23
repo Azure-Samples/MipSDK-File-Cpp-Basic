@@ -1,3 +1,12 @@
+---
+services: microsoft-information-protection
+platforms: cpp
+author: tommos
+level: 300
+client: Desktop
+service: Microsoft Information Protection
+---
+
 # MipSdk-FileApi-Cpp-Sample-Basic
 
 This sample illustrates basic SDK functionality where it:
