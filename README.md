@@ -21,7 +21,7 @@ This sample illustrates basic SDK functionality where it:
 
 ### Sample Setup
 
-> **Project folder** refers to the **MipSdk-FileApi-Cpp-Auth-Simple\MipSdk-FileApi-Cpp-Auth-Simple** directory in the folder where you cloned the repository.
+> **Project folder** refers to the **MipSdk-FileApi-Cpp-Sample-Basic\MipSdk-FileApi-Cpp-Sample-Basic** directory in the folder where you cloned the repository.
 
 1. Download MIP SDK Binaries from https://aka.ms/mipsdkbinaries and extract to a folder.
 2. From a command prompt, run: **git clone https://github.com/Azure-Samples/MipSdk-FileApi-Cpp-Sample-Basic**
@@ -40,6 +40,8 @@ This sample illustrates basic SDK functionality where it:
 ### Create an Azure AD App Registration
 
 Authentication against the Azure AD tenant requires creating a native application registration. The client ID created in this step is used in a later step to generate an OAuth2 token.
+
+> Skip this step if you've already created a registration for previous sample. You may continue to use that client ID.
 
 1. Go to https://portal.azure.com and log in as a global admin.
 > Your tenant may permit standard users to register applications. If you aren't a global admin, you can attempt these steps, but may need to work with a tenant administrator to have an application registered or be granted access to register applications.
@@ -68,50 +70,23 @@ The **Registered app** blade should now be displayed.
 12. Click **Select** then **Done**
 13. In the **Required Permissions** blade, click **Grant Permissions** and confirm.
 
-### Generate and update access token
+### Update Client ID, Username, and Password
 
-The MIP SDK requires two auth tokens for a user to successfully authenticate when performing both policy and protection actions; one for the policy endpoint and another for the protection endpoint. This sample uses only the policy endpoint to list labels and, consequently, requires only one token.
+1. Open up **main.cpp**.
+2. Find line 57 and replace **YOUR CLIENT HERE** with the client ID copied from the AAD App Registration.
+3. Find line 64 and enter your test username and password.
 
-The PowerShell script below can be used to generate a token for the policy endpoint, using redirect URI and client ID created above.
-
-> Note: ADAL.PS must be installed to run the script and requires admin rights to install.
-
-```powershell
-# Install ADAL.PS. Requires admin rights to install.
-Install-Package ADAL.PS
-
-$authority = "https://login.windows.net/common/oauth2/authorize"
-$resourceUrl = "https://syncservice.o365syncservice.com/"
-# Add your client ID here
-$clientId = "YOUR CLIENT ID"
-# Add your Redirect URI here
-$redirectUri = "YOUR REDIRECT URI"
-$response = Get-ADALToken -Resource $resourceUrl -ClientId $clientId -RedirectUri $redirectUri -Authority $authority -PromptBehavior:Always
-$response.AccessToken | clip
-```
-
-The script displays an Azure AD authentication prompt. Log in with a user from your tenant. If successful, the script will copy an OAuth2 token to the clipboard. Open **auth.cpp** and copy the token in to the mToken declaration:
-
-```cpp
-string AcquireToken()
-{
-    string mToken = "YOUR TOKEN HERE";
-    return mToken;
-}
-```
+> Hard coding a username and password isn't recommended. For the scope of this sample, it's an easier way to abstract auth.
 
 ## Run the Sample
 
 Press F5 to run the sample. The console application will start and after a brief moment displays the labels available for the user.
 
-To observe the authentication flow, set a breakpoint in **auth_delegate_impl.cpp** at line 51 and run. Note the values for the properties of `OAuth2Challenge`, specifically `mResource` and `mAuthority`:
-
-```cpp
-mAuthority = "https://login.windows.net/common/oauth2/authorize"
-mResource = "https://syncservice.o365syncservice.com/"
-```
-
-The API has provided the resource and authority obtained from the OAuth2 challenge from the service endpoint. As a developer, you don't need to worry about providing these service endpoints or authority; the APIs handle it automatically.
+- Copy a label ID to the clipboard.
+- Paste the label in to the input prompt.
+- Next, the app asks for a path to a file. Enter the path to an Office document or PDF file.
+- Finally, the app will display the name of the applied label.
+- Attempt to open the file in a viewer that supports labeling or protection (Office or Adobe Reader)
 
 ## Resources
 
