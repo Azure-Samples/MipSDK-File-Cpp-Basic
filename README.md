@@ -10,7 +10,7 @@ This sample illustrates basic SDK functionality where it:
 
 ## Summary
 
-`TODO tommos`
+This sample application illustrates using the MIP File API to list labels, apply a label, then read the label. All SDK actions are implemented in **action.cpp**. 
 
 ## Getting Started
 
