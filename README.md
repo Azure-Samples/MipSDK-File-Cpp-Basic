@@ -1,7 +1,7 @@
 ---
 services: microsoft-information-protection
 platforms: cpp
-author: tommos
+author: tommoser
 level: 300
 client: Desktop
 service: Microsoft Information Protection
