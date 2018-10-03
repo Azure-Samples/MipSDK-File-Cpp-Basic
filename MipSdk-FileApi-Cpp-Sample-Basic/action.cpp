@@ -115,7 +115,7 @@ namespace sample {
 			// Use mEngine::CreateFileHandlerAsync to create the handler
 			// Filepath, the mip::FileHandler::Observer implementation, and the promise are required. 
 			// Event notification will be provided to the appropriate function in the observer.
-			mEngine->CreateFileHandlerAsync(filepath, mip::ContentState::REST, std::make_shared<FileHandlerObserver>(), handlerPromise);
+			mEngine->CreateFileHandlerAsync(filepath, filepath, mip::ContentState::REST, false, std::static_pointer_cast<FileHandler::Observer>(std::make_shared<FileHandlerObserver>()), handlerPromise);
 
 			// Get the value and store in a mip::FileHandler object.
 			// auto resolves to std::shared_ptr<mip::FileHandler>
