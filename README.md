@@ -30,21 +30,11 @@ This sample application illustrates using the MIP File API to list labels, apply
 
 ### Sample Setup
 
-> **Project folder** refers to the **MipSdk-FileApi-Cpp-Sample-Basic\MipSdk-FileApi-Cpp-Sample-Basic** directory in the folder where you cloned the repository.
+In Visual Studio 2017:
 
-1. Download MIP SDK Binaries from https://aka.ms/mipsdkbinaries and extract to a folder.
-2. From a command prompt, run: **git clone https://github.com/Azure-Samples/MipSdk-FileApi-Cpp-Sample-Basic**
-3. In the folder where the ZIP was extracted, locate **mip_sdk_file_win32_version.zip** and extract the contents to a folder.
-4. Open the folder where the ZIP file was extracted in Windows Explorer.
-5. Copy the **include** folder in to the project folder.
-6. Navigate to **bins\debug\amd64** in the extracted File API ZIP.
-7. Copy *.lib to the project folder.
-8. Create a folder called **sdkbins** in the project folder.
-9. Copy *.dll from the **bins\debug\amd64** folder in to the **sdkbins** folder.
-10. Launch the project by double-clicking **MipSdk-FileApi-Cpp-Sample-Basic.sln**
-11. When the project starts, set the project type to **x64**
-12. In Visual Studio, click the **Build** menu, then click **Build**. The application should compile at this point, but will crash if run.
-13. Continue to the steps below to configure the Azure AD App Registration and update the sample code.
+1. Right-click the project and select **Manage NuGet Packages**
+2. On the **Browse** tab, search for *Microsoft.InformationProtection.File*
+3. Select the package and click **Install**
 
 ### Create an Azure AD App Registration
 
