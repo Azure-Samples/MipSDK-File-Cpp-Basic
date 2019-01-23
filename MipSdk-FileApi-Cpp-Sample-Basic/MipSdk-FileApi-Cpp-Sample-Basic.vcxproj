@@ -174,7 +174,9 @@
     <ClInclude Include="file_profile_observer_impl.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="auth.py" />
+    <None Include="auth.py">
+      <DeploymentContent>false</DeploymentContent>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
