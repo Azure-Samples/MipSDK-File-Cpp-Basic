@@ -56,10 +56,12 @@ namespace sample {
 		// Specifically, AuthDelegateInfo uses mAppInfo.ApplicationId for AAD client_id value.		
 		Action::Action(const mip::ApplicationInfo appInfo,
 			const std::string& username,
-			const std::string& password)
+			const std::string& password,
+			const bool generateAuditEvents)
 			: mAppInfo(appInfo),
 			mUsername(username),
-			mPassword(password) {
+			mPassword(password),
+			mGenerateAuditEvents(generateAuditEvents) {
 			mAuthDelegate = std::make_shared<sample::auth::AuthDelegateImpl>(mAppInfo, mUsername, mPassword);			
 		}	
 
@@ -92,7 +94,7 @@ namespace sample {
 			}			
 
 			// FileEngine requires a FileEngine::Settings object. The first parameter is the user identity or engine ID. 
-			FileEngine::Settings engineSettings(mip::Identity(mUsername), "");
+			FileEngine::Settings engineSettings(mip::Identity(mUsername), "", "en-US", false);
 
 			// Create promise and future for mip::FileEngine object
 			auto enginePromise = std::make_shared<std::promise<std::shared_ptr<FileEngine>>>();
@@ -111,11 +113,12 @@ namespace sample {
 			// Create promise/future for mip::FileHandler
 			auto handlerPromise = std::make_shared<std::promise<std::shared_ptr<FileHandler>>>();
 			auto handlerFuture = handlerPromise->get_future();
-
+			
 			// Use mEngine::CreateFileHandlerAsync to create the handler
 			// Filepath, the mip::FileHandler::Observer implementation, and the promise are required. 
 			// Event notification will be provided to the appropriate function in the observer.
-			mEngine->CreateFileHandlerAsync(filepath, filepath, mip::ContentState::REST, false, std::static_pointer_cast<FileHandler::Observer>(std::make_shared<FileHandlerObserver>()), handlerPromise);
+			// isAuditDiscoveryEnabled is set to true. This will generate discovery audits in AIP Analytics
+			mEngine->CreateFileHandlerAsync(filepath, filepath, mip::ContentState::REST, mGenerateAuditEvents, std::static_pointer_cast<FileHandler::Observer>(std::make_shared<FileHandlerObserver>()), handlerPromise);
 
 			// Get the value and store in a mip::FileHandler object.
 			// auto resolves to std::shared_ptr<mip::FileHandler>
@@ -208,9 +211,16 @@ namespace sample {
 			
 			// Commit changes to file referenced by fileHandler, writing to output file.
 			fileHandler->CommitAsync(outputFile, commitPromise);
+			auto result = commitFuture.get();
+
+			// If flag is set to generate audit events, call mip::FileHandler::NotifyCommitSuccessful() to generate audit entry.
+			if (mGenerateAuditEvents && result)
+			{
+				fileHandler->NotifyCommitSuccessful(outputFile);
+			}
 
 			// Get value from future and return to caller. Will be true if operation succeeded, false otherwise.
-			return commitFuture.get(); 
+			return result; 
 		}				
 	}
 }

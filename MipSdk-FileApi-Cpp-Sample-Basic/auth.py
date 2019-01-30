@@ -84,7 +84,7 @@ def main(argv):
     regex = re.compile('^(.*[\/])')
     match = regex.match(authority)
     authority = match.group()
-    authority = authority + 'token'
+    authority = authority + 'common/oauth2/token'
 
   # Build REST call
   headers = {

@@ -46,10 +46,11 @@ namespace sample {
 			return mToken;
 		}
 
-		//This function implements token acquisition in the application by calling an external Python script.
-		//The Python script requires username, password, clientId, resource, and authority. 
-		//Username, Password, and ClientId are provided by the user/developer		
-		//Resource and Authority are provided as part of the OAuth2Challenge object that is passed in by the SDK to the AuthDelegate.
+		// This function implements token acquisition in the application by calling an external Python script.
+		// The Python script requires username, password, clientId, resource, and authority. 
+		// Username, Password, and ClientId are provided by the user/developer		
+		// Resource and Authority are provided as part of the OAuth2Challenge object that is passed in by the SDK to the AuthDelegate.
+		// Certain advanced configuration settings, such as Conditional Access -> Terms of Use may cause this Python script to fail.
 		string AcquireToken(
 			const string& username,
 			const string& password,
