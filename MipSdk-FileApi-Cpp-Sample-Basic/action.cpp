@@ -211,15 +211,16 @@ namespace sample {
 			
 			// Commit changes to file referenced by fileHandler, writing to output file.
 			fileHandler->CommitAsync(outputFile, commitPromise);
+			auto result = commitFuture.get();
 
 			// If flag is set to generate audit events, call mip::FileHandler::NotifyCommitSuccessful() to generate audit entry.
-			if (mGenerateAuditEvents)
+			if (mGenerateAuditEvents && result)
 			{
 				fileHandler->NotifyCommitSuccessful(outputFile);
 			}
 
 			// Get value from future and return to caller. Will be true if operation succeeded, false otherwise.
-			return commitFuture.get(); 
+			return result; 
 		}				
 	}
 }
