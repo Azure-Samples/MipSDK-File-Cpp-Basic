@@ -27,11 +27,13 @@
 
 #include "action.h"
 
+#include "mip/mip_init.h"
 #include "mip/common_types.h"
 #include "mip/file/file_profile.h"
 #include "mip/file/file_engine.h"
 #include "mip/file/file_handler.h"
 #include "mip/file/labeling_options.h"
+
 
 #include "auth_delegate_impl.h"
 #include "consent_delegate_impl.h"
@@ -62,8 +64,16 @@ namespace sample {
 			mUsername(username),
 			mPassword(password),
 			mGenerateAuditEvents(generateAuditEvents) {
-			mAuthDelegate = std::make_shared<sample::auth::AuthDelegateImpl>(mAppInfo, mUsername, mPassword);			
-		}	
+			mAuthDelegate = std::make_shared<sample::auth::AuthDelegateImpl>(mAppInfo, mUsername, mPassword);
+		}
+
+		// Implement destructor to null MIP profile and engine references and call mip::ReleaseAllResources()
+		Action::~Action()
+		{
+			mProfile = nullptr;
+			mEngine = nullptr;
+			mip::ReleaseAllResources();
+		}
 
 		// Method illustrates how to create a new mip::FileProfile using promise/future
 		// Result is stored in private mProfile variable and referenced throughout lifetime of Action.
@@ -72,14 +82,14 @@ namespace sample {
 			// Initialize the FileProfile::Settings Object. Example below stores state data in /file_sample/ directory 
 			// Accepts AuthDelegate, new ConsentDelegate, new FileProfile::Observer, and ApplicationInfo object as last parameters.
 			FileProfile::Settings profileSettings("file_sample", true, mAuthDelegate, std::make_shared<sample::consent::ConsentDelegateImpl>(), std::make_shared<FileProfileObserver>(), mAppInfo);
-			
+
 			// Create promise and future for mip::FileProfile object.
 			auto profilePromise = std::make_shared<std::promise<std::shared_ptr<FileProfile>>>();
 			auto profileFuture = profilePromise->get_future();
 
 			// Call static function LoadAsync providing the settings and promise. This will make the profile available to use.
 			FileProfile::LoadAsync(profileSettings, profilePromise);
-			
+
 			// Get the future value and store in mProfile. mProfile is used throughout Action for profile operations.
 			mProfile = profileFuture.get();
 		}
@@ -91,7 +101,7 @@ namespace sample {
 			if (!mProfile)
 			{
 				AddNewFileProfile();
-			}			
+			}
 
 			// FileEngine requires a FileEngine::Settings object. The first parameter is the user identity or engine ID. 
 			FileEngine::Settings engineSettings(mip::Identity(mUsername), "", "en-US", false);
@@ -113,12 +123,12 @@ namespace sample {
 			// Create promise/future for mip::FileHandler
 			auto handlerPromise = std::make_shared<std::promise<std::shared_ptr<FileHandler>>>();
 			auto handlerFuture = handlerPromise->get_future();
-			
+
 			// Use mEngine::CreateFileHandlerAsync to create the handler
 			// Filepath, the mip::FileHandler::Observer implementation, and the promise are required. 
 			// Event notification will be provided to the appropriate function in the observer.
 			// isAuditDiscoveryEnabled is set to true. This will generate discovery audits in AIP Analytics
-			mEngine->CreateFileHandlerAsync(filepath, filepath, mip::ContentState::REST, mGenerateAuditEvents, std::static_pointer_cast<FileHandler::Observer>(std::make_shared<FileHandlerObserver>()), handlerPromise);
+			mEngine->CreateFileHandlerAsync(filepath, filepath, mGenerateAuditEvents, std::static_pointer_cast<FileHandler::Observer>(std::make_shared<FileHandlerObserver>()), handlerPromise);
 
 			// Get the value and store in a mip::FileHandler object.
 			// auto resolves to std::shared_ptr<mip::FileHandler>
@@ -133,7 +143,7 @@ namespace sample {
 		void Action::ListLabels() {
 
 			// If mEngine hasn't been set, call AddNewFileEngine() to load the engine.
-			if (!mEngine) {			
+			if (!mEngine) {
 				AddNewFileEngine();
 			}
 
@@ -143,7 +153,7 @@ namespace sample {
 			// Iterate through each label, first listing details
 			for (const auto& label : labels) {
 				cout << label->GetName() << " : " << label->GetId() << endl;
-				
+
 				// get all children for mip::Label and list details
 				for (const auto& child : label->GetChildren()) {
 					cout << "->  " << child->GetName() << " : " << child->GetId() << endl;
@@ -154,20 +164,42 @@ namespace sample {
 		// Reads a label from the file at filepath, the displays.
 		// Reading a label from a protected file will trigger consent flow, as implemented in mip::ConsentDelegate or derived classes.
 		// In this sample, simple consent flow is implemented in consent_delegate_impl.h/cpp.
-		void Action::ReadLabel(const std::string & filepath)
+		void Action::ReadLabel(const std::string & filepath)		
 		{
+			cout << "Attempting to read label from output file." << endl;
+
 			// Call private CreateFileHandler function, passing in file path. 
 			// Returns a std::shared_ptr<mip::FileHandler> that will be used to read the label.
 			auto handler = CreateFileHandler(filepath);
-			
+
 			// call mip::FileHandler::GetLabelAsync, passing in the promise.
 			// The handler has the rest of the details it needs (file path and policy data via FileEngine) to display result.
-			// handler->GetLabelAsync(labelPromise);
-			auto label = handler->GetLabel();
 			
+			auto label = handler->GetLabel();						
 			// Output results
-			cout << "Name: " + label->GetLabel()->GetName() << endl;
-			cout << "Id: " + label->GetLabel()->GetId() << endl;			
+		
+			if (nullptr != label)
+			{
+				// Attempt to fetch parent label.
+				auto parentLabel = std::shared_ptr<mip::Label>(label->GetLabel()->GetParent());
+				
+				// If parent exists, output parent \ child.
+				if (nullptr != parentLabel)
+				{										
+					cout << "Name: " + parentLabel->GetName() + "\\" + label->GetLabel()->GetName() << endl;
+					cout << "Id: " + label->GetLabel()->GetId() << endl;
+				}
+				// Else, output label info
+				else
+				{
+					cout << "Name: " + label->GetLabel()->GetName() << endl;
+					cout << "Id: " + label->GetLabel()->GetId() << endl;
+				}
+			}
+			else
+			{
+				cout << "No label found." << endl;
+			}
 		}
 
 
@@ -182,14 +214,14 @@ namespace sample {
 			// Labeling requires a mip::LabelingOptions object. 
 			// Review API ref for more details. The sample implies that the file was labeled manually by a user.
 			mip::LabelingOptions labelingOptions(mip::AssignmentMethod::PRIVILEGED, mip::ActionSource::MANUAL);
-			
+
 			// use the mip::FileHandler to set label with labelId and labelOptions created above
 			handler->SetLabel(labelId, labelingOptions);
 
 			// Changes to the file held by mip::FileHandler aren't committed until CommitAsync is called.						
 			// Call Action::CommitChanges to write changes. Commit logic is implemented there.
 			bool result = CommitChanges(handler, outputfile);
-			
+
 			// Write result to console.
 			if (result) {
 				cout << "Labeled: " + outputfile << endl;
@@ -198,7 +230,7 @@ namespace sample {
 				cout << "Failed to label: " + outputfile << endl;
 			}
 		}
-	
+
 		// Implements code to commit changes made via mip::FileHandler
 		// Accepts pointer to the mip::FileHandler and output file path
 		bool Action::CommitChanges(const std::shared_ptr<mip::FileHandler>& fileHandler, const std::string& outputFile)
@@ -208,7 +240,7 @@ namespace sample {
 			// The result provided will be true if the file was written, false if it failed.
 			auto commitPromise = std::make_shared<std::promise<bool>>();
 			auto commitFuture = commitPromise->get_future();
-			
+
 			// Commit changes to file referenced by fileHandler, writing to output file.
 			fileHandler->CommitAsync(outputFile, commitPromise);
 			auto result = commitFuture.get();
@@ -220,7 +252,7 @@ namespace sample {
 			}
 
 			// Get value from future and return to caller. Will be true if operation succeeded, false otherwise.
-			return result; 
-		}				
+			return result;
+		}
 	}
 }

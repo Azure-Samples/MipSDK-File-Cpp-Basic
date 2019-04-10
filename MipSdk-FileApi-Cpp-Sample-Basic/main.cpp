@@ -31,6 +31,7 @@
 #include <memory>
 #include <sstream>
 
+
 #include "action.h"
 #include "mip/common_types.h"
 #include "utils.h"
@@ -54,7 +55,7 @@ int main()
 	// Create the mip::ApplicationInfo object. 
 	// Client ID should be the client ID registered in Azure AD for your custom application.
 	// Friendly Name should be the name of the application as it should appear in reports.
-	mip::ApplicationInfo appInfo{"YOUR CLIENT ID HERE", "YOUR APP NAME HERE", "YOUR CLIENT VERSION" };
+	mip::ApplicationInfo appInfo{ "YOUR APP ID", "YOUR APP NAME", "YOUR APP VERSION" };
 	
 	// All actions for this tutorial project are implemented in samples::file::Action
 	// Source files are Action.h/cpp.
@@ -62,7 +63,7 @@ int main()
 	// Action's constructor takes in the mip::ApplicationInfo object and uses the client ID for auth.
 	// Username and password are required in this sample as the oauth2 token is obtained via Python script and basic auth.
 	// Final param enables or disable audit event generation.
-	Action action = Action(appInfo, "YOUR TEST USERNAME","YOUR TEST USER PASSWORD", true);
+	Action action = Action(appInfo, "YOUR TEST USERNAME", "YOUR TEST USER PASSWORD", true);
 
 	// Call action.ListLabels() to display all available labels, then pause.
 	action.ListLabels();	

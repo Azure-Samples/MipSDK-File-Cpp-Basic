@@ -74,7 +74,7 @@ namespace sample {
 			cmd += " -r ";
 			cmd += resource;
 			cmd += " -c ";
-			cmd += (!clientId.empty() ? clientId : "6b069eef-9dde-4a29-b402-8ce866edc897");
+			cmd += clientId;
 
 			string result = sample::utils::Execute(cmd.c_str());
 			if (result.empty())
