@@ -72,8 +72,9 @@ The **Registered app** blade should now be displayed.
 ### Update Client ID, Username, and Password
 
 1. Open up **main.cpp**.
-2. Find line 57 and replace **YOUR CLIENT HERE** with the client ID copied from the AAD App Registration.
-3. Find line 64 and enter your test username and password.
+2. Find line 58 and replace **YOUR CLIENT ID HERE** with the client ID copied from the AAD App Registration.
+3. Replace **YOUR APP NAME** with the name of your application and enter a version in place of **YOUR APP VERSION**. 
+4. Find line 66 and enter your test username and password, replacing the stub values.
 
 > Hard coding a username and password isn't recommended. For the scope of this sample, it's an easier way to abstract auth.
 
