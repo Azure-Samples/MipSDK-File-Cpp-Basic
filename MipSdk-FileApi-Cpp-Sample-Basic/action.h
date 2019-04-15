@@ -51,8 +51,9 @@ namespace sample {
 			Action(const mip::ApplicationInfo appInfo,
 				const std::string& username,
 				const std::string& password,
-				const bool generateAuditEvents);
-						
+				const bool generateAuditEvents);			
+			~Action();
+
 			void ListLabels();							// List all labels associated engine loaded for user			
 			void SetLabel(const std::string& filepath,	// Set label with labelId on input file, writing to outputfile.
 				const std::string& outputfile, 
