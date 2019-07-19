@@ -64,25 +64,36 @@ namespace sample {
 			mUsername(username),
 			mPassword(password),
 			mGenerateAuditEvents(generateAuditEvents) {
-			mAuthDelegate = std::make_shared<sample::auth::AuthDelegateImpl>(mAppInfo, mUsername, mPassword);
+			mAuthDelegate = std::make_shared<sample::auth::AuthDelegateImpl>(mAppInfo, mUsername, mPassword);				
 		}
 
-		// Implement destructor to null MIP profile and engine references and call mip::ReleaseAllResources()
+		// Implement destructor to null MIPContext, profile and engine references.
 		Action::~Action()
 		{
-			mProfile = nullptr;
 			mEngine = nullptr;
-			mip::ReleaseAllResources();
+			mProfile = nullptr;
+			mMipContext = nullptr;
 		}
 
 		// Method illustrates how to create a new mip::FileProfile using promise/future
 		// Result is stored in private mProfile variable and referenced throughout lifetime of Action.
 		void sample::file::Action::AddNewFileProfile()
-		{
-			// Initialize the FileProfile::Settings Object. Example below stores state data in /file_sample/ directory 
-			// Accepts AuthDelegate, new ConsentDelegate, new FileProfile::Observer, and ApplicationInfo object as last parameters.
-			FileProfile::Settings profileSettings("file_sample",mip::CacheStorageType::OnDiskEncrypted, mAuthDelegate, std::make_shared<sample::consent::ConsentDelegateImpl>(), std::make_shared<FileProfileObserver>(), mAppInfo);
+		{			
+			// Initialize MipContext. MipContext can be set to null at shutdown and will automatically release all resources.
+			mMipContext = mip::MipContext::Create(mAppInfo,
+				"file_sample",
+				mip::LogLevel::Trace,
+				nullptr /*loggerDelegateOverride*/,
+				nullptr /*telemetryOverride*/);
 
+			// Initialize the FileProfile::Settings Object.  
+			// Accepts MipContext, AuthDelegate, new ConsentDelegate, new FileProfile::Observer object as last parameters.
+			FileProfile::Settings profileSettings(mMipContext,
+				mip::CacheStorageType::OnDiskEncrypted, 
+				mAuthDelegate, 				
+				std::make_shared<sample::consent::ConsentDelegateImpl>(),
+				std::make_shared<FileProfileObserver>());
+			
 			// Create promise and future for mip::FileProfile object.
 			auto profilePromise = std::make_shared<std::promise<std::shared_ptr<FileProfile>>>();
 			auto profileFuture = profilePromise->get_future();
