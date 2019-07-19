@@ -81,7 +81,7 @@ namespace sample {
 		{
 			// Initialize the FileProfile::Settings Object. Example below stores state data in /file_sample/ directory 
 			// Accepts AuthDelegate, new ConsentDelegate, new FileProfile::Observer, and ApplicationInfo object as last parameters.
-			FileProfile::Settings profileSettings("file_sample", true, mAuthDelegate, std::make_shared<sample::consent::ConsentDelegateImpl>(), std::make_shared<FileProfileObserver>(), mAppInfo);
+			FileProfile::Settings profileSettings("file_sample",mip::CacheStorageType::OnDiskEncrypted, mAuthDelegate, std::make_shared<sample::consent::ConsentDelegateImpl>(), std::make_shared<FileProfileObserver>(), mAppInfo);
 
 			// Create promise and future for mip::FileProfile object.
 			auto profilePromise = std::make_shared<std::promise<std::shared_ptr<FileProfile>>>();
@@ -213,10 +213,10 @@ namespace sample {
 
 			// Labeling requires a mip::LabelingOptions object. 
 			// Review API ref for more details. The sample implies that the file was labeled manually by a user.
-			mip::LabelingOptions labelingOptions(mip::AssignmentMethod::PRIVILEGED, mip::ActionSource::MANUAL);
+			mip::LabelingOptions labelingOptions(mip::AssignmentMethod::PRIVILEGED);
 
 			// use the mip::FileHandler to set label with labelId and labelOptions created above
-			handler->SetLabel(labelId, labelingOptions);
+			handler->SetLabel(mEngine->GetLabelById(labelId), labelingOptions, mip::ProtectionSettings());
 
 			// Changes to the file held by mip::FileHandler aren't committed until CommitAsync is called.						
 			// Call Action::CommitChanges to write changes. Commit logic is implemented there.
