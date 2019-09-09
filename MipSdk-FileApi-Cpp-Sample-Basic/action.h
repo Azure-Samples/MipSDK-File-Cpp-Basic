@@ -32,6 +32,7 @@
 #include <memory>
 #include <string>
 
+#include "mip/mip_context.h"
 #include "mip/common_types.h"
 #include "mip/file/file_profile.h"
 #include "mip/file/file_engine.h"
@@ -69,6 +70,7 @@ namespace sample {
 			std::shared_ptr<mip::FileHandler> CreateFileHandler(const std::string& filepath); //Creates mip::FileHandler for specified file
 
 			std::shared_ptr<sample::auth::AuthDelegateImpl> mAuthDelegate;			// AuthDelegateImpl object that will be used throughout the sample to store auth details.
+			std::shared_ptr<mip::MipContext> mMipContext;							// mip::MipContext
 			std::shared_ptr<mip::FileProfile> mProfile;								// mip::FileProfile object to store/load state information 
 			std::shared_ptr<mip::FileEngine> mEngine;								// mip::FileEngine object to handle user-specific actions. 
 			std::shared_ptr<sample::consent::ConsentDelegateImpl> mConsentDelegate; // Implements consent flow. Review consent_delegate_impl.cpp for implementation details.						
