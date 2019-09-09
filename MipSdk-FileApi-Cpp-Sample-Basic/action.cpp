@@ -83,6 +83,7 @@ namespace sample {
 			mMipContext = mip::MipContext::Create(mAppInfo,
 				"file_sample",
 				mip::LogLevel::Trace,
+				false,
 				nullptr /*loggerDelegateOverride*/,
 				nullptr /*telemetryOverride*/);
 
