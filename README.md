@@ -1,10 +1,12 @@
 ---
-services: microsoft-information-protection
-platforms: cpp
-author: tommoser
-level: 300
-client: Desktop
-service: Microsoft Information Protection
+page_type: sample
+languages:
+- cpp
+- python
+products:
+- azure
+description: "This sample application illustrates using the MIP File API to list labels, apply a label, then read the label. All SDK actions are implemented in action.cpp."
+urlFragment: mipsdk-fileapi-cpp-sample-basic 
 ---
 
 # MipSdk-FileApi-Cpp-Sample-Basic
