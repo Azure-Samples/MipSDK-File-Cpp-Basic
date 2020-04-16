@@ -90,8 +90,7 @@ namespace sample {
 			// Initialize the FileProfile::Settings Object.  
 			// Accepts MipContext, AuthDelegate, new ConsentDelegate, new FileProfile::Observer object as last parameters.
 			FileProfile::Settings profileSettings(mMipContext,
-				mip::CacheStorageType::OnDiskEncrypted, 
-				mAuthDelegate, 				
+				mip::CacheStorageType::OnDiskEncrypted, 			
 				std::make_shared<sample::consent::ConsentDelegateImpl>(),
 				std::make_shared<FileProfileObserver>());
 			
@@ -116,7 +115,11 @@ namespace sample {
 			}
 
 			// FileEngine requires a FileEngine::Settings object. The first parameter is the user identity or engine ID. 
-			FileEngine::Settings engineSettings(mip::Identity(mUsername), "", "en-US", false);
+			FileEngine::Settings engineSettings(mip::Identity(mUsername), 
+													mAuthDelegate, 
+													"", 
+													"en-US", 
+													false);
 
 			// Create promise and future for mip::FileEngine object
 			auto enginePromise = std::make_shared<std::promise<std::shared_ptr<FileEngine>>>();
