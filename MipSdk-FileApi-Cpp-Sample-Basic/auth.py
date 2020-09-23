@@ -29,7 +29,7 @@ import getopt
 import sys
 import json
 import re
-from adal import AuthenticationContext
+from msal import PublicClientApplication
 
 def printUsage():
   print('auth.py -u <username> -p <password> -a <authority> -r <resource> -c <clientId>')
@@ -67,16 +67,24 @@ def main(argv):
     printUsage()
     sys.exit(-1)
 
-  # Find everything after the last '/' and replace it with 'token'
-  if not authority.endswith('token'):
-    regex = re.compile('^(.*[\/])')
-    match = regex.match(authority)
-    authority = match.group()
-    authority = authority + username.split('@')[1]
+  # ONLY FOR DEMO PURPOSES AND MSAL FOR PYTHON
+  # This shouldn't be required when using proper auth flows in production.  
+  if authority.find('common') > 1:
+    authority = authority.split('/common')[0] + "/organizations"
+   
+  app = PublicClientApplication(client_id=clientId, authority=authority)  
+  
+  result = None  
 
-  auth_context = AuthenticationContext(authority)
-  token = auth_context.acquire_token_with_username_password(resource, username, password, clientId)
-  print(token["accessToken"])
+  if resource.endswith('/'):
+    resource += ".default"    
+  else:
+    resource += "/.default"
+  
+  # *DO NOT* use username/password authentication in production system.
+  # Instead, consider auth code flow and using a browser to fetch the token.
+  result = app.acquire_token_by_username_password(username=username, password=password, scopes=[resource])  
+  print(result['access_token'])
 
 if __name__ == '__main__':  
   main(sys.argv[1:])
