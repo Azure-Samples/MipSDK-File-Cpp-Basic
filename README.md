@@ -21,14 +21,14 @@ This sample illustrates basic SDK functionality where it:
 
 ## Summary
 
-This sample application illustrates using the MIP File API to list labels, apply a label, then read the label. All SDK actions are implemented in **action.cpp**. 
+This sample application illustrates using the MIP File API to list labels, apply a label, then read the label. All SDK actions are implemented in **action.cpp**.
 
 ## Getting Started
 
 ### Prerequisites
 
 - Visual Studio 2015 or later with Visual C++ development features installed
-- Python 2.7 installed and in the system path
+- Python 3+ installed and in the system path
 
 ### Sample Setup
 
@@ -45,40 +45,47 @@ Authentication against the Azure AD tenant requires creating a native applicatio
 > Skip this step if you've already created a registration for previous sample. You may continue to use that client ID.
 
 1. Go to https://portal.azure.com and log in as a global admin.
-> Your tenant may permit standard users to register applications. If you aren't a global admin, you can attempt these steps, but may need to work with a tenant administrator to have an application registered or be granted access to register applications.
-2. Click Azure Active Directory, then **App Registrations** in the menu blade.
-3. Click **View all applications**
-4. Click **New Applications Registration**
-5. For name, enter **MipSdk-Sample-Apps**
-6. Set **Application Type** to **Native**
-7. For Redirect URI, enter **mipsdk-auth-sample://authorize**   
-  > Note: This can be anything you'd like, but should be unique in the tenant.
-8. Click **Create**
+   > Your tenant may permit standard users to register applications. If you aren't a global admin, you can attempt these steps, but may need to work with a tenant administrator to have an application registered or be granted access to register applications.
+2. Select Azure Active Directory, then **App Registrations** on the left side menu.
+3. Select **New registration**
+4. For name, enter **MipSdk-Sample-Apps**
+5. Under **Supported account types** set **Accounts in this organizational directory only**
+   > Optionally, set this to **Accounts in any organizational directory**.
+6. Select **Register**
 
-The **Registered app** blade should now be displayed.
+The **Application registration** screen should now be displaying your new application.
 
-1. Click **Settings**
-2. Click **Required Permissions**
-3. Click **Add**
-4. Click **Select an API**
-5. Select **Microsoft Rights Management Services** and click **Select**
-6. Under **Select Permissions** select **Create and access protected content for users**
-7. Click **Select** then **Done**
-8. Click **Add**
-9. Click **Select an API**
-10. In the search box, type **Microsoft Information Protection Sync Service** then select the service and click **Select**
-11. Under **Select Permissions** select **Read all unified policies a user has access to.**
-12. Click **Select** then **Done**
-13. In the **Required Permissions** blade, click **Grant Permissions** and confirm.
+### Add API Permissions 
+
+1. Select **API Permissions**
+2. Select **Add a permission**
+3. Select **Azure Rights Management Services**
+4. Select **Delegated permissions**
+5. Check **user_impersonation** and select **Add permissions** at the bottom of the screen.
+6. Select **Add a permission**
+7. Select **APIs my organization uses**
+8. In the search box, type **Microsoft Information Protection Sync Service** then select the service.
+9. Select **Delegated permissions**
+10. Check **UnifiedPolicy.User.Read** then select **Add permissions**
+11. In the **API permissions** menu, select **Grant admin consent for <TENANT NAME>** and confirm.
+
+### Set Redirect URI
+
+1. Select **Authentication**.
+2. Select **Add a platform**.
+3. Select **Mobile and desktop applications**
+4. Select the default native client redirect URI, which should look similar to **https://login.microsoftonline.com/common/oauth2/nativeclient**.
+5. Under **Advanced settings** set **Treat as a public client** to **yes**.
+   > This is required only for the MIP SDK sample apps using MSAL for Python.
+6. Select **configure** and be sure to save and changes if required. 
 
 ### Update Client ID, Username, and Password
 
 1. Open up **main.cpp**.
-2. Find line 58 and replace **YOUR CLIENT ID HERE** with the client ID copied from the AAD App Registration.
-3. Replace **YOUR APP NAME** with the name of your application and enter a version in place of **YOUR APP VERSION**. 
-4. Find line 66 and enter your test username and password, replacing the stub values.
+2. Replace **YOUR CLIENT ID HERE** with the client ID copied from the AAD App Registration.
+3. Find the tokens for **YOUR USERNAME HERE** and **YOUR PASSWORD HERE** and insert test user credentials. 
 
-> Hard coding a username and password isn't recommended. For the scope of this sample, it's an easier way to abstract auth.
+> DO NOT hard code a production username and password.
 
 ## Run the Sample
 
