@@ -55,7 +55,7 @@ int main()
 	// Create the mip::ApplicationInfo object. 
 	// Client ID should be the client ID registered in Azure AD for your custom application.
 	// Friendly Name should be the name of the application as it should appear in reports.
-	mip::ApplicationInfo appInfo{ "YOUR CLIENT ID HERE", "MIP SDK File Sample Quick Start for C++", "1.7.0" };
+	mip::ApplicationInfo appInfo{ "YOUR CLIENT ID HERE", "MIP SDK File Sample Quick Start for C++", "1.8.0" };
 	
 	// All actions for this tutorial project are implemented in samples::file::Action
 	// Source files are Action.h/cpp.
