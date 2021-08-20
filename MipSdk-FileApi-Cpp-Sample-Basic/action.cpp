@@ -69,9 +69,10 @@ namespace sample {
 
 		// Implement destructor to null MIPContext, profile and engine references.
 		Action::~Action()
-		{
+		{			
 			mEngine = nullptr;
 			mProfile = nullptr;
+			mMipContext->ShutDown();
 			mMipContext = nullptr;
 		}
 
@@ -79,14 +80,15 @@ namespace sample {
 		// Result is stored in private mProfile variable and referenced throughout lifetime of Action.
 		void sample::file::Action::AddNewFileProfile()
 		{			
-			// Initialize MipContext. MipContext can be set to null at shutdown and will automatically release all resources.
-			mMipContext = mip::MipContext::Create(mAppInfo,
-				"file_sample",
-				mip::LogLevel::Trace,
-				false,
-				nullptr /*loggerDelegateOverride*/,
-				nullptr /*telemetryOverride*/);
+			// Initialize MipConfiguration.
+			std::shared_ptr<mip::MipConfiguration> mipConfiguration = std::make_shared<mip::MipConfiguration>(mAppInfo,
+																												"file_sample",
+																												mip::LogLevel::Trace,
+																												false);
 
+			// Initialize MipContext. MipContext can be set to null at shutdown and will automatically release all resources.
+			mMipContext = mip::MipContext::Create(mipConfiguration);
+			
 			// Initialize the FileProfile::Settings Object.  
 			// Accepts MipContext, AuthDelegate, new ConsentDelegate, new FileProfile::Observer object as last parameters.
 			FileProfile::Settings profileSettings(mMipContext,
@@ -95,8 +97,8 @@ namespace sample {
 				std::make_shared<FileProfileObserver>());
 			
 			// Create promise and future for mip::FileProfile object.
-			auto profilePromise = std::make_shared<std::promise<std::shared_ptr<FileProfile>>>();
-			auto profileFuture = profilePromise->get_future();
+			std::shared_ptr<std::promise<std::shared_ptr<mip::FileProfile>>> profilePromise = std::make_shared<std::promise<std::shared_ptr<FileProfile>>>();
+			std::future<std::shared_ptr<mip::FileProfile>> profileFuture = profilePromise->get_future();
 
 			// Call static function LoadAsync providing the settings and promise. This will make the profile available to use.
 			FileProfile::LoadAsync(profileSettings, profilePromise);
@@ -122,8 +124,8 @@ namespace sample {
 													false);
 
 			// Create promise and future for mip::FileEngine object
-			auto enginePromise = std::make_shared<std::promise<std::shared_ptr<FileEngine>>>();
-			auto engineFuture = enginePromise->get_future();
+			std::shared_ptr<std::promise<std::shared_ptr<mip::FileEngine>>> enginePromise = std::make_shared<std::promise<std::shared_ptr<FileEngine>>>();
+			std::future<std::shared_ptr<mip::FileEngine>> engineFuture = enginePromise->get_future();
 
 			// Engines are added to profiles. Call AddEngineAsync on mProfile, providing settings and promise
 			// then get the future value and set in mEngine. mEngine will be used throughout Action for engine operations.
@@ -136,8 +138,8 @@ namespace sample {
 		std::shared_ptr<mip::FileHandler> Action::CreateFileHandler(const std::string& filepath)
 		{
 			// Create promise/future for mip::FileHandler
-			auto handlerPromise = std::make_shared<std::promise<std::shared_ptr<FileHandler>>>();
-			auto handlerFuture = handlerPromise->get_future();
+			std::shared_ptr<std::promise<std::shared_ptr<mip::FileHandler>>> handlerPromise = std::make_shared<std::promise<std::shared_ptr<FileHandler>>>();
+			std::future<std::shared_ptr<mip::FileHandler>> handlerFuture = handlerPromise->get_future();
 
 			// Use mEngine::CreateFileHandlerAsync to create the handler
 			// Filepath, the mip::FileHandler::Observer implementation, and the promise are required. 
@@ -191,8 +193,8 @@ namespace sample {
 			// The handler has the rest of the details it needs (file path and policy data via FileEngine) to display result.
 			
 			auto label = handler->GetLabel();						
+
 			// Output results
-		
 			if (nullptr != label)
 			{
 				// Attempt to fetch parent label.
@@ -232,7 +234,7 @@ namespace sample {
 
 			// use the mip::FileHandler to set label with labelId and labelOptions created above
 			handler->SetLabel(mEngine->GetLabelById(labelId), labelingOptions, mip::ProtectionSettings());
-
+		
 			// Changes to the file held by mip::FileHandler aren't committed until CommitAsync is called.						
 			// Call Action::CommitChanges to write changes. Commit logic is implemented there.
 			bool result = CommitChanges(handler, outputfile);
@@ -250,22 +252,28 @@ namespace sample {
 		// Accepts pointer to the mip::FileHandler and output file path
 		bool Action::CommitChanges(const std::shared_ptr<mip::FileHandler>& fileHandler, const std::string& outputFile)
 		{
-			// CommitAsync is implemented similar to other async patterns via promise/future
-			// In this instance, rather than a mip related object, we create the promise for a bool
-			// The result provided will be true if the file was written, false if it failed.
-			auto commitPromise = std::make_shared<std::promise<bool>>();
-			auto commitFuture = commitPromise->get_future();
+			bool result = false;
 
-			// Commit changes to file referenced by fileHandler, writing to output file.
-			fileHandler->CommitAsync(outputFile, commitPromise);
-			auto result = commitFuture.get();
-
-			// If flag is set to generate audit events, call mip::FileHandler::NotifyCommitSuccessful() to generate audit entry.
-			if (mGenerateAuditEvents && result)
+			// Commit only if handler has been modified. Otherwise, return false.
+			if (fileHandler->IsModified())
 			{
-				fileHandler->NotifyCommitSuccessful(outputFile);
-			}
+				// CommitAsync is implemented similar to other async patterns via promise/future
+				// In this instance, rather than a mip related object, we create the promise for a bool
+				// The result provided will be true if the file was written, false if it failed.
+				auto commitPromise = std::make_shared<std::promise<bool>>();
+				auto commitFuture = commitPromise->get_future();
 
+				// Commit changes to file referenced by fileHandler, writing to output file.
+				fileHandler->CommitAsync(outputFile, commitPromise);
+				result = commitFuture.get();
+
+				// If flag is set to generate audit events, call mip::FileHandler::NotifyCommitSuccessful() to generate audit entry.
+				if (mGenerateAuditEvents && result)
+				{
+					fileHandler->NotifyCommitSuccessful(outputFile);
+				}
+			}
+			
 			// Get value from future and return to caller. Will be true if operation succeeded, false otherwise.
 			return result;
 		}
