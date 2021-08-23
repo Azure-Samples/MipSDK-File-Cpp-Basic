@@ -82,10 +82,10 @@ namespace sample {
 		{			
 			// Initialize MipConfiguration.
 			std::shared_ptr<mip::MipConfiguration> mipConfiguration = std::make_shared<mip::MipConfiguration>(mAppInfo,
-																												"file_sample",
+																												"mip_data",
 																												mip::LogLevel::Trace,
 																												false);
-
+						
 			// Initialize MipContext. MipContext can be set to null at shutdown and will automatically release all resources.
 			mMipContext = mip::MipContext::Create(mipConfiguration);
 			
@@ -122,6 +122,9 @@ namespace sample {
 													"", 
 													"en-US", 
 													false);
+
+			// Set the engineId to the username. This ensures that the same engine is loaded across sessions.
+			engineSettings.SetEngineId(mUsername);
 
 			// Create promise and future for mip::FileEngine object
 			std::shared_ptr<std::promise<std::shared_ptr<mip::FileEngine>>> enginePromise = std::make_shared<std::promise<std::shared_ptr<FileEngine>>>();
