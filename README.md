@@ -4,12 +4,13 @@ languages:
 - cpp
 - python
 products:
-- azure
+- m365
+- office-365
 description: "This sample application illustrates using the MIP File API to list labels, apply a label, then read the label. All SDK actions are implemented in action.cpp."
-urlFragment: mipsdk-fileapi-cpp-sample-basic 
+urlFragment: MipSDK-File-Cpp-Basic
 ---
 
-# MipSdk-FileApi-Cpp-Sample-Basic
+# MipSDK-File-Cpp-Basic
 
 This sample illustrates basic SDK functionality where it:
 
