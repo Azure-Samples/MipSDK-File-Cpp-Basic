@@ -28,12 +28,12 @@ This sample application illustrates using the MIP File API to list labels, apply
 
 ### Prerequisites
 
-- Visual Studio 2015 or later with Visual C++ development features installed
+- Visual Studio 2022 or later with Visual C++ development features installed
 - Python 3+ installed and in the system path
 
 ### Sample Setup
 
-In Visual Studio 2017:
+In Visual Studio 2022:
 
 1. Right-click the project and select **Manage NuGet Packages**
 2. On the **Browse** tab, search for *Microsoft.InformationProtection.File*

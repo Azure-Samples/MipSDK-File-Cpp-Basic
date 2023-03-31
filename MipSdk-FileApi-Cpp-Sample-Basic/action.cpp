@@ -85,7 +85,12 @@ namespace sample {
 																												"mip_data",
 																												mip::LogLevel::Trace,
 																												false);
-						
+
+			// This section can be uncommented to enable CBC mode publishing for testing. 			
+			//std::map<mip::FlightingFeature, bool> featureSettings = std::map<mip::FlightingFeature, bool>();
+			//featureSettings.emplace(mip::UseCbcForOfficeFileEncryption, true);
+			//mipConfiguration->SetFeatureSettings(featureSettings);
+
 			// Initialize MipContext. MipContext can be set to null at shutdown and will automatically release all resources.
 			mMipContext = mip::MipContext::Create(mipConfiguration);
 			
@@ -143,7 +148,7 @@ namespace sample {
 			// Create promise/future for mip::FileHandler
 			std::shared_ptr<std::promise<std::shared_ptr<mip::FileHandler>>> handlerPromise = std::make_shared<std::promise<std::shared_ptr<FileHandler>>>();
 			std::future<std::shared_ptr<mip::FileHandler>> handlerFuture = handlerPromise->get_future();
-
+						
 			// Use mEngine::CreateFileHandlerAsync to create the handler
 			// Filepath, the mip::FileHandler::Observer implementation, and the promise are required. 
 			// Event notification will be provided to the appropriate function in the observer.
